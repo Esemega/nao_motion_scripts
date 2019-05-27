@@ -8,15 +8,16 @@ import moveit_msgs.msg
 import geometry_msgs.msg
 
 moveit_commander.roscpp_initialize(sys.argv)
-rospy.init_node('get_data', anonymous=True)
+rospy.init_node('planning_script', anonymous=True)
 
 robot = moveit_commander.RobotCommander()
 scene = moveit_commander.PlanningSceneInterface()
-group_name = "head"
+group_name = "right_arm"
 group = moveit_commander.MoveGroupCommander(group_name)
 display_trajectory_publisher = rospy.Publisher(
     '/move_group/display_planned_path',
-    moveit_msgs.msg.DisplayTrajectory, queue_size=1)
+    moveit_msgs.msg.DisplayTrajectory, queue_size=10)
+
 # We can get the name of the reference frame for this robot:
 planning_frame = group.get_planning_frame()
 print "============ Reference frame: %s" % planning_frame
@@ -39,5 +40,32 @@ print "============ Current Pose:", group.get_current_pose()
 print "============ Printing robot state"
 print robot.get_current_state()
 print ""
+
+
+
+pose_target = geometry_msgs.msg.Pose()
+#position:
+pose_target.position.x = 0.0717712344001
+pose_target.position.y = -0.146325356577
+pose_target.position.z = 0.00365870221197
+#orientation:
+pose_target.orientation.x = 0.930022518084
+pose_target.orientation.y = 0.0193773262919
+pose_target.orientation.z = -0.0282458605982
+pose_target.orientation.w = 0.365902728114
+
+
+group.set_pose_target(pose_target)
+
+#group.set_random_target()
+
+plan1 = group.plan()
+
+rospy.sleep(5)
+
+group.go(wait=True)
+
+group.stop()
+group.clear_pose_targets()
 
 moveit_commander.roscpp_shutdown()
